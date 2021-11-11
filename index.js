@@ -35,9 +35,26 @@ async function run() {
             const id = req.params.id;
             const query = { _id: ObjectId(id) }
             const product = await productsCollection.findOne(query);
-
             console.log("target product found");
             res.json(product);
+        })
+
+        // get all order api
+        app.get('/orders', async (req, res) => {
+            const email = req?.query?.email;
+            if (email) {
+                const query = { email };
+                const cursor = ordersCollection.find(query);
+                const orders = await cursor.toArray();
+                console.log('single user order found');
+                res.json(orders);
+            }
+            else {
+                const cursor = ordersCollection.find({});
+                const orders = await cursor.toArray();
+                console.log('orders found');
+                res.json(orders);
+            }
         })
 
         // save user api
