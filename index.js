@@ -39,23 +39,43 @@ async function run() {
             res.json(product);
         })
 
-        // get all order api
-        app.get('/orders', async (req, res) => {
-            const email = req?.query?.email;
-            if (email) {
-                const query = { email };
-                const cursor = ordersCollection.find(query);
-                const orders = await cursor.toArray();
-                console.log('single user order found');
-                res.json(orders);
-            }
-            else {
-                const cursor = ordersCollection.find({});
-                const orders = await cursor.toArray();
-                console.log('orders found');
-                res.json(orders);
-            }
+        // add a product api
+        app.post('/products', async (req, res) => {
+            const newPlace = req.body;
+            const result = await productsCollection.insertOne(newPlace);
+            console.log('added product');
+            res.json(result);
         })
+
+        // update product api
+        app.put('/products/:id', async (req, res) => {
+            const id = req.params.id;
+            const updateProduct = req.body;
+            const filter = { _id: ObjectId(id) };
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: {
+                    name: updateProduct.name,
+                    img: updateProduct.img,
+                    price: updateProduct.price,
+                    detail: updateProduct.detail
+                },
+            };
+            const result = await productsCollection.updateOne(filter, updateDoc, options);
+            console.log('updated product');
+            res.json(result);
+        })
+
+        // delete product api
+        app.delete('/products/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await productsCollection.deleteOne(query);
+            console.log('product deleted');
+            res.json(result);
+        })
+
+
 
         // save user api
         app.post('/users', async (req, res) => {
@@ -76,6 +96,27 @@ async function run() {
             res.json(result);
         })
 
+
+
+
+        // get all order api
+        app.get('/orders', async (req, res) => {
+            const email = req?.query?.email;
+            if (email) {
+                const query = { email };
+                const cursor = ordersCollection.find(query);
+                const orders = await cursor.toArray();
+                console.log('single user order found');
+                res.json(orders);
+            }
+            else {
+                const cursor = ordersCollection.find({});
+                const orders = await cursor.toArray();
+                console.log('orders found');
+                res.json(orders);
+            }
+        })
+
         // save order api
         app.post('/orders', async (req, res) => {
             const order = req.body;
@@ -84,14 +125,33 @@ async function run() {
             res.json(result);
         })
 
+        // update order status api
+        app.put('/orders/:id', async (req, res) => {
+            const id = req.params.id;
+            const updateStatus = req.body;
+            const filter = { _id: ObjectId(id) };
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: {
+                    status: updateStatus.status
+                },
+            };
+            const result = await ordersCollection.updateOne(filter, updateDoc, options);
+            console.log('updated status');
+            res.json(result);
+        })
+
         // delete order api
         app.delete('/orders/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
             const result = await ordersCollection.deleteOne(query);
-            console.log('product deleted');
+            console.log('order deleted');
             res.json(result);
         })
+
+
+
 
         // check admin api
         app.get('/users/:email', async (req, res) => {
@@ -102,6 +162,7 @@ async function run() {
             if (user?.role === 'admin') {
                 isAdmin = true;
             }
+            console.log('admin : ', isAdmin);
             res.json({ admin: isAdmin });
         })
 
