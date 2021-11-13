@@ -21,6 +21,7 @@ async function run() {
         const productsCollection = database.collection('products');
         const usersCollection = database.collection('users');
         const ordersCollection = database.collection('orders');
+        const reviewCollection = database.collection('reviews');
 
         // get products api
         app.get('/products', async (req, res) => {
@@ -39,7 +40,7 @@ async function run() {
             res.json(product);
         })
 
-        // add a product api
+        // add product api
         app.post('/products', async (req, res) => {
             const newPlace = req.body;
             const result = await productsCollection.insertOne(newPlace);
@@ -77,6 +78,14 @@ async function run() {
 
 
 
+        // get user api
+        app.get('/users', async (req, res) => {
+            const cursor = usersCollection.find({});
+            const users = await cursor.toArray();
+            console.log('Users found');
+            res.send(users);
+        })
+
         // save user api
         app.post('/users', async (req, res) => {
             const user = req.body;
@@ -99,7 +108,7 @@ async function run() {
 
 
 
-        // get all order api
+        // get orders api
         app.get('/orders', async (req, res) => {
             const email = req?.query?.email;
             if (email) {
@@ -152,7 +161,6 @@ async function run() {
 
 
 
-
         // check admin api
         app.get('/users/:email', async (req, res) => {
             const email = req.params.email;
@@ -175,6 +183,25 @@ async function run() {
             console.log('admin makes successfully');
             res.json(result);
         })
+
+
+
+        // get reviews api
+        app.get('/reviews', async (req, res) => {
+            const cursor = reviewCollection.find({});
+            const reviews = await cursor.toArray();
+            console.log('reviews found');
+            res.send(reviews);
+        })
+
+        // save review api
+        app.post('/reviews', async (req, res) => {
+            const review = req.body;
+            const result = await reviewCollection.insertOne(review);
+            console.log('review added');
+            res.json(result);
+        })
+
 
         console.log('database connection ok');
     } finally {
