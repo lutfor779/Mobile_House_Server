@@ -3,6 +3,7 @@ const ObjectId = require('mongodb').ObjectId;
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
+const stripe = require("stripe")(process.env.STRIPE_SECRET)
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -203,6 +204,23 @@ async function run() {
             res.json(result);
         })
 
+
+
+        // payment
+        app.post("/create-payment-intent", async (req, res) => {
+            const paymentInfo = req.body;
+            const amount = paymentInfo.bill * 100;     //stripe use cent/poisa not taka.
+
+            const paymentIntent = await stripe.paymentIntents.create({
+                amount: amount,
+                currency: "bdt",
+                automatic_payment_methods: {
+                    enabled: true,
+                },
+            });
+
+            res.json({ clientSecret: paymentIntent.client_secret });
+        });
 
         console.log('database connection ok');
     } finally {
